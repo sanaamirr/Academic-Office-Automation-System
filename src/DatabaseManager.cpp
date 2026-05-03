@@ -11,7 +11,11 @@ using namespace std ;
 
 
  DatabaseManager :: DatabaseManager () {
-     students = new Student [100] ; 
+     students = new Student *[100] ; 
+     for(int i = 0; i < 100; i++) {
+        students[i] = nullptr;
+    }
+    studentCount = 0;
     courses = new course [50];
  }
  void DatabaseManager :: load_students () {
@@ -29,23 +33,29 @@ using namespace std ;
     if (line.empty()) continue; 
 
     stringstream ss(line);
-    string id, name, email, gpaStr, credStr; // Added 'email'
+    string id, name, email, gpaStr, credStr , type ;
 
     getline(ss, id,     '|');      
     getline(ss, name,   '|');    
-    getline(ss, email,  '|');   // 1. ADD THIS: Read the email column
-    getline(ss, credStr, '|');  // 2. This is now your Credits (e.g., "3")
-    getline(ss, gpaStr);        // 3. This reads the rest (Course list)
+    getline(ss, email,  '|');   
+    getline(ss, credStr, '|');
+    getline(ss, type, '|');  
+    getline(ss, gpaStr);
+    
+    string cleanType = trim(type);
+        if (cleanType == "Scholarship") {
+            students[studentCount] = new ScholarshipStudent();
+        } else if (cleanType == "Exchange") {
+            students[studentCount] = new ExchangeStudent();
+        } else {
+            students[studentCount] = new RegularStudent();
+        }
 
-
-    // Inside the while loop of load_students
 getline(ss, gpaStr); // This contains "Core:Multivariable Calculus,Elective:Physics"
 
 string cleanCourseList = trim(gpaStr);
 stringstream courseSS(cleanCourseList);
 string courseEntry;
-
-// Split by comma to get each course
 while (getline(courseSS, courseEntry, ',')) {
     courseEntry = trim(courseEntry); // e.g., "Core:Multivariable Calculus"
     
@@ -71,23 +81,22 @@ while (getline(courseSS, courseEntry, ',')) {
         }
 
         // Now that credits are set, add it to the student
-        students[studentCount].add_course(&tempCourse);
+        students[studentCount]->add_course(&tempCourse);
     }
 }
     try {
-        students[studentCount].ID = trim(id);
-        students[studentCount].name = trim(name);
-        students[studentCount].email = trim(email); // 1. Set the email
-
-        // Use the correct variables for conversion
+        students[studentCount]->ID = trim(id);
+        students[studentCount]->name = trim(name);
+        students[studentCount]->email = trim(email); 
+        students[studentCount]->type = cleanType; 
+        
         string cleanCred = trim(credStr); 
         if (!cleanCred.empty()) {
-            students[studentCount].credits = stoi(cleanCred);
+            students[studentCount]->credits = stoi(cleanCred);
         }
 
-        // Note: If the GPA isn't in this file, you might need 
-        // to set a default or calculate it later.
-        students[studentCount].GPA = 0.0; 
+        
+        students[studentCount]->GPA = 0.0; 
 
         studentCount++; 
     } catch (const std::exception& e) {
@@ -141,8 +150,6 @@ int weightageCount = 0 ;
     cout << "Weightages loaded successfully " << endl ; 
     course_file.close();
  }
-
-// yet to be completed 
 string DatabaseManager ::  trim(const string& str) {
     size_t first = str.find_first_not_of(' ');
     if (string::npos == first) return str;
@@ -151,7 +158,7 @@ string DatabaseManager ::  trim(const string& str) {
 }
 int  DatabaseManager :: findStudentIndexByID ( int student_id ) {
     for ( int i = 0 ; i < 100 ; i ++ ) {
-        if ( students[i].ID == "s" + to_string ( student_id ) ) {
+        if ( students[i]->ID == "s" + to_string ( student_id ) ) {
             return i ; 
         }        
     }
@@ -161,27 +168,26 @@ Student* DatabaseManager :: getStudent ( int student_id ) {
     int idx = findStudentIndexByID(student_id ) ;
     if ( idx!= -1 ) {
         cout << "Student found " << endl ; 
-        return &students[idx] ; }
+        return students[idx] ; }
 else {
     cout << "Student not found " << endl ; 
     return nullptr ; 
 }
 }
-
 void DatabaseManager :: load_records (int student_id ) {
     cout << "loading " << endl ; 
 // 1. Find the student in your database array
     int sIdx = findStudentIndexByID(student_id);
     if (sIdx == -1) return; 
 
-    Student& currentStudent = students[sIdx];
+    Student* currentStudent = students[sIdx];
 
     // 2. Loop through each course the student is taking
-    cout << "Loading records for: " << currentStudent.name 
-         << " | Courses found: " << currentStudent.current_count << endl;
+    cout << "Loading records for: " << currentStudent->name 
+         << " | Courses found: " << currentStudent->current_count << endl;
     load_weightages(); 
-    for (int i = 0; i < currentStudent.current_count; i++) {
-        course* currentCourse = &currentStudent.courses[i];
+    for (int i = 0; i < currentStudent->current_count; i++) {
+        course* currentCourse = &currentStudent->courses[i];
         
         for ( int j = 0 ; j < 3 ; j++ ) {
             if ( weightage[j].courseType == currentCourse->courseType ) {
@@ -262,4 +268,28 @@ ifstream recordFile(fileName);
     }
 }
         recordFile.close() ; }
+}
+void DatabaseManager::generateTranscript(int targetID) {
+    // 1. FIND the student
+    Student* s = getStudent(targetID); 
+    
+    if (s != nullptr) {
+        // 2. LOAD the data from the files (The logic you just fixed!)
+        load_records(targetID); 
+        
+        // 3. CALCULATE the final GPA
+        s->calculate(); 
+        
+        // 4. DISPLAY the result
+        s->viewTranscript(); 
+    } else {
+        cout << "Error: Student not found in database." << endl;
+    }
+}
+DatabaseManager::~DatabaseManager() {
+    for (int i = 0; i < studentCount; i++) {
+        delete students[i]; // Delete each individual student
+    }
+    delete[] students; // Delete the array of pointers
+    delete[] courses;
 }

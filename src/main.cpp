@@ -12,7 +12,7 @@ int main () {
 // s1.display() ;
 DatabaseManager db ;
 db.load_students() ;
-int student_id = 1001 ; 
+int student_id = 1002 ; 
 
 
 
@@ -22,8 +22,9 @@ int student_id = 1001 ;
  Student* studentPtr = db.getStudent(student_id); 
     if (studentPtr != nullptr) {
         cout << "if statement " << endl ; 
-        studentPtr->calculate(); // Now this will have the data loaded by db
-       // studentPtr->display();   // Should show the correct GPA now
+        studentPtr->calculate() ; 
+        studentPtr->viewTranscript() ; // Now this will have the data loaded by db
+       // studentPtr->display();   
     } else {
         cout << "Student not found in Database!" << endl;
     }

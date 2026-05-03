@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include "../include/AcademicEntity.h"
 #include "../include/Student.h"
 #include "../include/Course.h"
@@ -20,34 +21,20 @@ this->aWeight = aWeight;
     assessments[4] = new Assignment();
     assessments[5] = new Assignment();
 } 
-void course :: display () {
-cout << this->Coursename << endl << 
-this->credits << endl ;  
+void course :: displayCourseDetails () {
+    double grade = this->calculate(); // The logic we fixed earlier
+    cout << left << setw(25) << Coursename 
+         << setw(10) << courseType 
+         << setw(10) << credits 
+         << "Grade: " << fixed << setprecision(2) << grade << "%" << endl;
 }
-// reading the assessment data from the course file 
-// ifstream course_file ("Course.txt");
-// int no_of_assessments = 0; 
-// string assessment ;
-// double qWeight , aWeight , eWeight ; 
-// while ( course_file >> assessment ) {
-//     if ( assessment == "Quiz"){
-//     course_file >>qNum >> qWeight ; 
-// }
-//     else if (assessment == "Assignment"){
-//         course_file >>aNum >>aWeight ; 
-//     }
-//      else if (assessment == "Exam"){
-//         course_file >>eNum >>eWeight ; 
-//     }
-// }
-// no_of_assessments = qNum + aNum + eNum ; 
 
 double course :: calculate () {
     double final_grade = 0.0 ; 
     for (int i = 0; i < 6; i++) {
     if (assessments[i]) {
         double val = assessments[i]->calculate();
-        cout << "Assessment " << i << " value: " << val << endl;
+        // cout << "Assessment " << i << " value: " << val << endl;
         final_grade += val;
     }
 }

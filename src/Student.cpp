@@ -1,13 +1,15 @@
 #include <iostream>
+#include <iomanip>
 #include "../include/AcademicEntity.h"
 #include "../include/Student.h"
 #include "../include/Course.h"
 using namespace std ;
 
 // using scope resolution operator for definition of class methods 
-Student :: Student ( string id , string name  , string email , double gpa  , int cr , int current_count , int max_count ) : AcademicEntity( id , name , email ) {
+Student :: Student ( string id , string name  , string email , double gpa  , int cr , string type , int current_count , int max_count ) : AcademicEntity( id , name , email ) {
     this->GPA = gpa ; 
     this->credits = cr ;
+    this->type = type ;
     this->current_count = current_count;
     this->max_count = max_count;
     courses = new course [max_count];  
@@ -20,7 +22,7 @@ void Student :: display () {
     << "Credit Hours Completed : " << this->credits << endl ;
     cout << "Enrolled Courses : " << endl ;
     for ( int i = 0 ; i < current_count ; i++){
-        courses[i].display() ; 
+       // courses[i].displayCourseDetails() ; 
         cout << endl ; 
     }  
 }
@@ -60,7 +62,6 @@ void Student :: calculate () {
     double total_quality_points = 0.0 ; 
     int total_credits = 0 ; 
     for ( int i = 0 ; i < current_count ; i++){
-        cout << "Course: " << courses[i].Coursename << " | Credits: " << courses[i].credits << endl;
 
         total_quality_points += courses[i].calculate() * courses[i].credits ; 
         total_credits += courses[i].credits ; 
@@ -71,6 +72,58 @@ void Student :: calculate () {
     }
     cout << "GPA calculated successfully. Current GPA is : " << this->GPA << endl ; 
 }
+void Student::viewTranscript() {
+    cout << "============================================" << endl;
+    cout << "           ACADEMIC TRANSCRIPT              " << endl;
+    cout << "============================================" << endl;
+    cout << "Name: " << name << " | ID: " << ID << endl;
+    cout << "--------------------------------------------" << endl;
+    cout << left << setw(25) << "Course Name" << setw(10) << "Type" << setw(10) << "Credits" << "Score" << endl;
+    cout << "--------------------------------------------" << endl;
+    for (int i = 0; i < current_count; i++) {
+        courses[i].displayCourseDetails();
+    }
 
+    cout << "--------------------------------------------" << endl;
+    cout << "Final GPA: " << fixed << setprecision(2) << GPA << endl;
+    cout << "============================================" << endl;
+}
+void RegularStudent::viewTranscript() {
+ Student :: viewTranscript() ; 
+   
+}
+void ExchangeStudent::viewTranscript() {
+    cout << "--- EXCHANGE STUDENT TRANSCRIPT (PASS/FAIL) ---" << endl;
+    cout << "Name: " << name << " | ID: " << ID << endl;
+    cout << "--------------------------------------------" << endl;
 
+    for (int i = 0; i < current_count; i++) {
+        double grade = courses[i].calculate();
+        string status = (grade >= 50.0) ? "PASS" : "FAIL";
+        
+        cout << left << setw(25) << courses[i].Coursename 
+             << "Status: " << status << " (Credits: " << courses[i].credits << ")" << endl;
+    }
+    cout << "--------------------------------------------" << endl;
+    cout << "Overall Result: " << (GPA >= 2.0 ? "TRANSFERRED" : "NOT TRANSFERRED") << endl;
+}
+void ScholarshipStudent::viewTranscript() {
+    // 1. Reuse the existing logic to print courses and header
+    // We explicitly call the base class version to avoid infinite recursion
+    Student:: calculate () ; 
+    Student::viewTranscript(); 
 
+    // 2. Add Scholarship-specific details
+    cout << "--- SCHOLARSHIP STATUS ---" << endl;
+    
+    // Check GPA against the minimum (e.g., 3.0)
+    if (GPA < 3.0) {
+        cout << "WARNING: Your GPA is " << GPA << "." << endl;
+        cout << "STATUS: PROBATION" << endl;
+        cout << "Action Required: Contact Academic Advisor immediately." << endl;
+    } else {
+        cout << "STATUS: ACTIVE" << endl;
+        cout << "Congratulations, your scholarship is in good standing." << endl;
+    }
+    cout << "============================================" << endl;
+}
