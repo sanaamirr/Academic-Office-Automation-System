@@ -16,6 +16,11 @@ using namespace std ;
         students[i] = nullptr;
     }
     studentCount = 0;
+    teachers = new Teacher *[20];
+    for(int i = 0; i < 20; i++) {
+        teachers[i] = nullptr;
+    }
+    teacherCount = 0 ; 
     courses = new course [50];
  }
  void DatabaseManager :: load_students () {
@@ -51,24 +56,21 @@ using namespace std ;
             students[studentCount] = new RegularStudent();
         }
 
-getline(ss, gpaStr); // This contains "Core:Multivariable Calculus,Elective:Physics"
+getline(ss, gpaStr); 
 
 string cleanCourseList = trim(gpaStr);
 stringstream courseSS(cleanCourseList);
 string courseEntry;
 while (getline(courseSS, courseEntry, ',')) {
-    courseEntry = trim(courseEntry); // e.g., "Core:Multivariable Calculus"
+    courseEntry = trim(courseEntry); 
     
     size_t colonPos = courseEntry.find(':');
     if (colonPos != string::npos) {
         string type = courseEntry.substr(0, colonPos);
         string name = courseEntry.substr(colonPos + 1);
 
-        // Create a temporary course object
-       
         course tempCourse(name, type); 
-        // --- CREDIT ASSIGNMENT LOGIC ---
-        // We use the 'type' string to set the 'credits' data member
+
         if (type == "Core") {
             tempCourse.credits = 3;
         } else if (type == "Elective") {
@@ -76,11 +78,10 @@ while (getline(courseSS, courseEntry, ',')) {
         } else if (type == "Lab") {
             tempCourse.credits = 1;
         } else {
-            tempCourse.credits = 0; // Safety default
+            tempCourse.credits = 0; 
             cout << "Warning: Unknown course type for " << name << endl;
         }
 
-        // Now that credits are set, add it to the student
         students[studentCount]->add_course(&tempCourse);
     }
 }
@@ -150,7 +151,67 @@ int weightageCount = 0 ;
     cout << "Weightages loaded successfully " << endl ; 
     course_file.close();
  }
-string DatabaseManager ::  trim(const string& str) {
+void DatabaseManager :: load_teachers () {
+string filename = "../data/Teacher.txt";
+    ifstream file(filename);
+
+    if (!file.is_open()) {
+        cout << "Error: Could not open teacher file!" << endl;
+        return;
+    }
+    else {
+        cout << "File has been opened successfully " << endl ; 
+    }
+
+    string line;
+    int index = 0;
+    int max = 20 ; 
+
+    // Read file line by line
+    while (getline(file, line) && index < max ) {
+ cout << "File is being read" << endl ; 
+        if (line.empty()){
+            cout << "reading empty lines "<< endl ; 
+         break ; }
+
+
+        stringstream ss(line);
+        string id, name, email, dept, subject, ratingStr, countStr;
+
+        // 1. Extract data using the pipe '|' delimiter
+        getline(ss, id, '|');
+        getline(ss, name, '|');
+        getline(ss, email, '|');
+        getline(ss, dept, '|');
+        getline(ss, subject, '|');
+        getline(ss, ratingStr, '|'); 
+        getline(ss, countStr, '|');  
+         cout << id << name << email << endl ; 
+        double loadedRating = (ratingStr == "" || ratingStr == " ") ? 0.0 : stod(ratingStr);
+        int loadedCount = (countStr == "" || countStr == " ") ? 0 : stoi(countStr);
+
+        cout << "Putting away the data " << endl ; 
+        if ( teachers[index] == nullptr ){
+            teachers[index] = new Teacher () ; 
+        }
+      teachers[index]->ID = id;
+teachers[index]->name = name;
+teachers[index]->email = email;
+teachers[index]->department = dept;
+teachers[index]->subject = subject;
+teachers[index]->total_ratingSum = loadedRating; 
+teachers[index]->rating_count = loadedCount;
+
+        index++;
+        cout << "Index" << endl ; 
+    }
+cout << "It is here " << endl ; 
+    this->teacherCount = index; 
+    file.close();
+    cout << "Successfully loaded " << teacherCount << " teachers." << endl;
+}
+
+ string DatabaseManager ::  trim(const string& str) {
     size_t first = str.find_first_not_of(' ');
     if (string::npos == first) return str;
     size_t last = str.find_last_not_of(' ');
@@ -163,6 +224,24 @@ int  DatabaseManager :: findStudentIndexByID ( int student_id ) {
         }        
     }
     return -1 ; 
+}
+int  DatabaseManager :: findTeacherIndexByID ( int teacher_id ) {
+    for ( int i = 0 ; i < 20 ; i ++ ) {
+        if ( teachers[i]->ID == "t" + to_string ( teacher_id ) ) {
+            return i ; 
+        }        
+    }
+    return -1 ; 
+}
+Teacher* DatabaseManager :: getTeacher ( int teacher_id ) {
+    int idx = findTeacherIndexByID(teacher_id ) ;
+    if ( idx!= -1 ) {
+        cout << "Teacher found " << endl ; 
+        return teachers[idx] ; }
+else {
+    cout << "Teacher not found " << endl ; 
+    return nullptr ; 
+}
 }
 Student* DatabaseManager :: getStudent ( int student_id ) {
     int idx = findStudentIndexByID(student_id ) ;
@@ -197,9 +276,8 @@ void DatabaseManager :: load_records (int student_id ) {
             }
         } 
 
-        // --- STEP B: OPEN THE STUDENT'S RECORD FILE ---
        string folderPath = "../data/"; 
-string fileName = folderPath + trim(currentCourse->Coursename) + ".txt"; // Ensure name is "Multivariable Calculus"
+string fileName = folderPath + trim(currentCourse->Coursename) + ".txt"; 
 
 ifstream recordFile(fileName);
         if (!recordFile.is_open()) {
@@ -209,7 +287,6 @@ ifstream recordFile(fileName);
             cout << "opening record file " << endl ;         }
 
         string line;
-     //   getline(recordFile, line); // Skip the course name header
 
         // --- STEP C: SEARCH FOR THE STUDENT ID ---
        while (getline(recordFile, line)  )  {
@@ -223,16 +300,11 @@ ifstream recordFile(fileName);
     getline(ss, idStr, '|');
     idStr = trim(idStr);
 
-    // 2. Read the Name (e.g., Sana) and DISCARD it
-    // We don't need it because we already have the student object
     getline(ss, nameStr, '|');
 
-    // 3. Compare IDs
-    // Assuming student_id is an int like 1002, we compare it to "s1002"
     cout << "ID" << idStr << endl ; 
     if (idStr == "s" + to_string(student_id)) {
         cout << "Found student record for ID: " << idStr << endl;
-        // These are the max marks and weights you defined earlier
         double max_vals[6] = {10, 10, 50, 50, 20, 20};
         double weights[6] = {
             currentCourse->qWeight/2, currentCourse->qWeight/2, 
@@ -250,7 +322,6 @@ ifstream recordFile(fileName);
             if (getline(ss, scoreStr, '|')) {
                 string cleanScore = trim(scoreStr);
                 
-                // Safety check: make sure it's not empty before converting
                 if (!cleanScore.empty()) {
                     try {
                         double raw = stod(cleanScore);
@@ -261,7 +332,7 @@ ifstream recordFile(fileName);
                 }
             }
         }
-        break; // Found the student, no need to keep reading this file
+        break; 
     }
     else {
         cout << "Student not found in record " << fileName << endl ; 
@@ -292,4 +363,5 @@ DatabaseManager::~DatabaseManager() {
     }
     delete[] students; // Delete the array of pointers
     delete[] courses;
+    delete[] teachers ; 
 }

@@ -1,8 +1,11 @@
 #include <iostream>
 #include <iomanip>
+#include <fstream>
+#include"../include/DatabaseManager.h"
 #include "../include/AcademicEntity.h"
 #include "../include/Student.h"
 #include "../include/Course.h"
+#include "../include/Teacher.h"
 using namespace std ;
 
 // using scope resolution operator for definition of class methods 
@@ -108,15 +111,10 @@ void ExchangeStudent::viewTranscript() {
     cout << "Overall Result: " << (GPA >= 2.0 ? "TRANSFERRED" : "NOT TRANSFERRED") << endl;
 }
 void ScholarshipStudent::viewTranscript() {
-    // 1. Reuse the existing logic to print courses and header
-    // We explicitly call the base class version to avoid infinite recursion
     Student:: calculate () ; 
     Student::viewTranscript(); 
-
-    // 2. Add Scholarship-specific details
     cout << "--- SCHOLARSHIP STATUS ---" << endl;
     
-    // Check GPA against the minimum (e.g., 3.0)
     if (GPA < 3.0) {
         cout << "WARNING: Your GPA is " << GPA << "." << endl;
         cout << "STATUS: PROBATION" << endl;
@@ -127,3 +125,60 @@ void ScholarshipStudent::viewTranscript() {
     }
     cout << "============================================" << endl;
 }
+// void Student :: add_rating( double score  , string teacher_id ){
+//     if (score< 1 || score > 5) {
+//         cout << "Error: Rating must be between 1 and 5." << endl;
+//         return;
+//     }  
+//     ifstream file("../data/Teacher.txt");
+//     ofstream temp("../data/temp.txt");
+//     string line;
+//     bool found = false;
+
+//     while (getline(file, line)) {
+//         if (line.find(teacher_id) != string::npos) {
+//             found = true;
+//             stringstream ss(line);
+//             string id, name, email, dept, subject, ratingCount, rating;
+
+//             // 2. Parse the existing data (Assumes: ID | Name | Email | Dept | Sub | Sum | Count)
+//             getline(ss, id, '|');
+//             getline(ss, name, '|');
+//             getline(ss, email, '|');
+//             getline(ss, dept, '|');
+//             getline(ss, subject, '|');
+//             getline(ss, ratingCount, '|');
+//             getline(ss, rating, '|');
+
+//             // 3. Apply the Formula
+//             // assuming that we will load a teachers array also 
+//             this->rating_count ++ ; 
+//              if ( this->rating_count  == 1  ){
+//                    this->total_ratingSum = score ;
+//              }
+//              else {
+//                 this->total_ratingSum = this->total_ratingSum + ( score - this->total_ratingSum) / this->rating_count;
+//              }
+         
+
+//             // 4. Reconstruct the line with updated stats
+//             // We use fixed/setprecision to keep the file looking clean
+//             stringstream updated;
+//             updated << id << "|" << name << "|" << email << "|" << dept << "|" << subject << "|" 
+//                     << fixed << setprecision(1) << ratingCount << "|" << rating  << "|";
+            
+//             temp << updated.str() << endl;
+//         } else {
+//             temp << line << endl;
+//         }
+//     }
+
+//     file.close();
+//     temp.close();
+
+//     remove("../data/Teacher.txt");
+//     rename("../data/temp.txt", "../data/Teacher.txt");
+
+//     if (found) cout << "Rating submitted! New Average: " << endl;
+//     else cout << "Teacher ID not found." << endl;
+// }

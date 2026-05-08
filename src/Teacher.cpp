@@ -8,9 +8,11 @@
 #include "../include/Teacher.h"
 using namespace std ;
 
-Teacher :: Teacher ( string id , string name , string email , string department , string subject ) : AcademicEntity ( id , name , email ) {
+Teacher :: Teacher ( string id , string name , string email , string department , string subject , int rating_count , double total_ratingSum  ) : AcademicEntity ( id , name , email ) {
 this->department = department ;
 this->subject = subject ; 
+this->rating_count = rating_count ; 
+this->total_ratingSum = total_ratingSum ; 
 } 
 
 void Teacher :: updateRecord ( const string& courseName ) {
@@ -261,4 +263,62 @@ void Teacher :: display () {
     << "Teacher Name  : " << this->name << endl <<"Teacher email : " << this->email << endl 
     << "Department : " << this->department << endl 
     << "Subject : " << this->subject << endl ;
+}
+
+void Teacher :: add_rating( double score  , string teacher_id ){
+    if (score< 1 || score > 5) {
+        cout << "Error: Rating must be between 1 and 5." << endl;
+        return;
+    }  
+    ifstream file("../data/Teacher.txt");
+    ofstream temp("../data/temp.txt");
+    string line;
+    bool found = false;
+
+    while (getline(file, line)) {
+        if (line.find(teacher_id) != string::npos) {
+            found = true;
+            stringstream ss(line);
+            string id, name, email, dept, subject, ratingCount, rating;
+
+            // 2. Parse the existing data (Assumes: ID | Name | Email | Dept | Sub | Sum | Count)
+            getline(ss, id, '|');
+            getline(ss, name, '|');
+            getline(ss, email, '|');
+            getline(ss, dept, '|');
+            getline(ss, subject, '|');
+            getline(ss, ratingCount, '|');
+            getline(ss, rating, '|');
+
+            // 3. Apply the Formula
+            // assuming that we will load a teachers array also 
+            this->rating_count ++ ; 
+             if ( this->rating_count  == 1  ){
+                   this->total_ratingSum = score ;
+             }
+             else {
+                this->total_ratingSum = this->total_ratingSum + ( score - this->total_ratingSum) / this->rating_count;
+             }
+         
+
+            // 4. Reconstruct the line with updated stats
+            // We use fixed/setprecision to keep the file looking clean
+            stringstream updated;
+            updated << id << "|" << name << "|" << email << "|" << dept << "|" << subject << "|" 
+                    << fixed << setprecision(1) << ratingCount << "|" << rating  << "|";
+            
+            temp << updated.str() << endl;
+        } else {
+            temp << line << endl;
+        }
+    }
+
+    file.close();
+    temp.close();
+
+    remove("../data/Teacher.txt");
+    rename("../data/temp.txt", "../data/Teacher.txt");
+
+    if (found) cout << "Rating submitted! New Average: " << endl;
+    else cout << "Teacher ID not found." << endl;
 }
