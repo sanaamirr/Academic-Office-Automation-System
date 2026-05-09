@@ -14,7 +14,7 @@ int main () {
 // s1.display() ;
 int student_id = 1002 ; 
  DatabaseManager db ;
- db.load_venues() ; 
+ db.load_courses() ; 
 //  db.load_students() ;
 //  cout << "Enter teacher id ";
 //  string teacher_id ;

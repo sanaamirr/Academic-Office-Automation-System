@@ -9,6 +9,7 @@ using namespace std ;
 #include "../include/DatabaseManager.h"
 #include"../include/Assessment.h"
 #include "../include/Venue.h"
+#include "../include/Classes.h"
  DatabaseManager :: DatabaseManager () {
      students = new Student *[100] ; 
      for(int i = 0; i < 100; i++) {
@@ -26,6 +27,11 @@ using namespace std ;
     }
     venueCount  = 0 ; 
     courses = new course [50];
+    classes = new Classes *[20];
+    for(int i = 0; i < 20; i++) {
+        classes[i] = nullptr;
+    }
+    classescount  = 0 ; 
  }
 void DatabaseManager :: load_students () {
     ifstream input_file("../data/Student.txt");  
@@ -138,7 +144,6 @@ int weightageCount = 0 ;
             
             weightage[weightageCount].courseType = trim(type);
             
-            // 2. TRIM BEFORE STOD - This is the most likely crash site
             string cleanExam = trim(examW);
             string cleanAssign = trim(assignW);
             string cleanQuiz = trim(quizW);
@@ -246,7 +251,6 @@ void DatabaseManager :: load_venues () {
         // 2. Memory Safety: Double Pointer Check
         if (venues[index] == nullptr) {
              venues[index] = new Venue();
-            // venues[index]->isBooked = new bool[3];
         }
 
         // 3. Simple Assignments
@@ -272,7 +276,58 @@ void DatabaseManager :: load_venues () {
     cout << "Successfully loaded " << venueCount << " venues." << endl;
    
 }
- string DatabaseManager ::  trim(const string& str) {
+void DatabaseManager :: load_courses () {
+    ifstream file("../data/Classes.txt");
+    if (!file.is_open()) {
+        cerr << "Error: Could not open " << endl;
+        return;
+    }
+
+    string line;
+    int index = 0;
+
+    // Allocate the array of pointers if not already initialized
+    // if (this->classesArray == nullptr) {
+    //     this->classesArray = new Classes*[100]; 
+    // }
+
+    while (getline(file, line) && index < 20) {
+        if (line.empty()) continue;
+
+        stringstream ss(line);
+        string id, name, type, temp;
+        int count;
+        bool assigned;
+
+        getline(ss, id, '|');
+        getline(ss, name, '|');
+        
+        getline(ss, temp, '|');
+        count = stoi(temp);
+        
+        getline(ss, type, '|'); 
+        
+        getline(ss, temp, '|');
+        assigned = (stoi(temp) != 0); 
+
+        try {
+            // 2. Create the new Classes object using your constructor
+            // Note: Your constructor order is (ID, Name, Count, Type, isAssigned)
+            classes[index] = new Classes(id, name, count, type, assigned);
+            
+            index++;
+        } catch (const invalid_argument& e) {
+            cerr << "Skipping line due to conversion error: " << line << endl;
+            continue;
+        }
+    }
+
+    this->classescount = index;
+    file.close();
+    cout << "Successfully loaded " << classescount << " class records." << endl;
+
+}
+string DatabaseManager ::  trim(const string& str) {
     size_t first = str.find_first_not_of(' ');
     if (string::npos == first) return str;
     size_t last = str.find_last_not_of(' ');
@@ -420,9 +475,12 @@ void DatabaseManager::generateTranscript(int targetID) {
 }
 DatabaseManager::~DatabaseManager() {
     for (int i = 0; i < studentCount; i++) {
-        delete students[i]; // Delete each individual student
+        delete students[i]; 
     }
-    delete[] students; // Delete the array of pointers
+    delete[] students;
     delete[] courses;
+    for (int i = 0; i < teacherCount; i++) {
+        delete teachers[i]; 
+    }
     delete[] teachers ; 
 }

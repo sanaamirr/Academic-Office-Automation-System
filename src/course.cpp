@@ -6,7 +6,7 @@
 #include <fstream>
 using namespace std ; 
 
-course :: course ( string Coursename ,  string courseType ,int credits , double qWeight , double eWeight , double aWeight ) {
+course :: course ( string Coursename ,  string courseType ,int credits , double qWeight , double eWeight , double aWeight) {
 this->Coursename = Coursename ; 
 this->credits = credits ; 
 this->courseType = courseType ; 
@@ -20,6 +20,8 @@ this->aWeight = aWeight;
     assessments[3] = new Exam();
     assessments[4] = new Assignment();
     assessments[5] = new Assignment();
+
+    
 } 
 void course :: displayCourseDetails () {
     double grade = this->calculate(); // The logic we fixed earlier
