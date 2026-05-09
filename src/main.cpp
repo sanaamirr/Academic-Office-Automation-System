@@ -5,6 +5,7 @@
 #include "../include/Assessment.h"
 #include "../include/DatabaseManager.h"
 #include "../include/Teacher.h"
+#include "../include/Venue.h"
 using namespace std ; 
 int main () {
 // Student s1("s1002", "Sana", "sana@email.com", 3.5, 12, 0, 2 ); 
@@ -13,13 +14,14 @@ int main () {
 // s1.display() ;
 int student_id = 1002 ; 
  DatabaseManager db ;
+ db.load_venues() ; 
 //  db.load_students() ;
- cout << "Enter teacher id ";
- string teacher_id ;
- cin >> teacher_id;
- db.load_teachers() ; 
-Teacher * t1 = db.getTeacher (1001); 
- t1->add_rating(3 , teacher_id);
+//  cout << "Enter teacher id ";
+//  string teacher_id ;
+//  cin >> teacher_id;
+//  db.load_teachers() ; 
+// Teacher * t1 = db.getTeacher (1001); 
+//  t1->add_rating(3 , teacher_id);
  //  for ( int i = 0 ; i < 3 ; i++){
 //     cout << students[i].display ()  << endl ; 
 //  }

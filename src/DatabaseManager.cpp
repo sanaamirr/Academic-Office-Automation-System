@@ -8,8 +8,7 @@ using namespace std ;
 #include "../include/Course.h" 
 #include "../include/DatabaseManager.h"
 #include"../include/Assessment.h"
-
-
+#include "../include/Venue.h"
  DatabaseManager :: DatabaseManager () {
      students = new Student *[100] ; 
      for(int i = 0; i < 100; i++) {
@@ -21,9 +20,14 @@ using namespace std ;
         teachers[i] = nullptr;
     }
     teacherCount = 0 ; 
+      venues = new Venue *[20];
+    for(int i = 0; i < 20; i++) {
+        venues[i] = nullptr;
+    }
+    venueCount  = 0 ; 
     courses = new course [50];
  }
- void DatabaseManager :: load_students () {
+void DatabaseManager :: load_students () {
     ifstream input_file("../data/Student.txt");  
 
     if (!input_file.is_open()) {
@@ -107,7 +111,7 @@ while (getline(courseSS, courseEntry, ',')) {
     input_file.close();
     cout << "Students loaded successfully " << endl ; 
  }
- void DatabaseManager :: load_weightages () {
+void DatabaseManager :: load_weightages () {
     cout << "Loading weightages  "  << endl ; 
     ifstream course_file ("../data/Courses.txt");
     if (!course_file.is_open()) {
@@ -210,7 +214,64 @@ cout << "It is here " << endl ;
     file.close();
     cout << "Successfully loaded " << teacherCount << " teachers." << endl;
 }
+void DatabaseManager :: load_venues () {
+    string filename = "../data/Venues.txt";
+    ifstream file(filename);
 
+    if (!file.is_open()) {
+        cout << "Error: Could not open venue file!" << endl;
+        return;
+    }
+    else {
+        cout << "file has been opened " << endl ; 
+    }
+
+    string line;
+    int index = 0;
+    int maxVenues = 20; 
+
+    while (getline(file, line) && index < maxVenues) {
+        cout << "Inside the loop " << endl ; 
+        if (line.empty()) continue;
+
+        stringstream ss(line);
+        string id, capStr, compStr, slotsStr;
+
+        // 1. Extract data using '|'
+        getline(ss, id, '|');     
+        getline(ss, capStr, '|');  
+        getline(ss, compStr, '|'); 
+        getline(ss, slotsStr, '|'); 
+
+        // 2. Memory Safety: Double Pointer Check
+        if (venues[index] == nullptr) {
+             venues[index] = new Venue();
+            // venues[index]->isBooked = new bool[3];
+        }
+
+        // 3. Simple Assignments
+        venues[index]->roomID = id;
+        venues[index]->capacity = (capStr == "" || capStr == " ") ? 0 : stoi(capStr);
+        venues[index]->hasComputers = (compStr == "1");
+
+        stringstream slotSS(slotsStr);
+        string singleSlot;
+        int slotIndex = 0;
+        
+        while (getline(slotSS, singleSlot, ',') && slotIndex < 3) {
+            venues[index]->isBooked[slotIndex] = (singleSlot == "1");
+            slotIndex++;
+        }
+
+        index++;
+    }
+
+    this->venueCount = index;
+    file.close(); 
+    cout << "File has been closed" << endl ; 
+    cout << "Successfully loaded " << venueCount << " venues." << endl;
+   
+}
  string DatabaseManager ::  trim(const string& str) {
     size_t first = str.find_first_not_of(' ');
     if (string::npos == first) return str;
