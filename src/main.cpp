@@ -8,62 +8,62 @@
 #include "../include/Venue.h"
 #include "../include/Scheduler.h"
 using namespace std ; 
+
 int main () {
-// Student s1("s1002", "Sana", "sana@email.com", 3.5, 12, 0, 2 ); 
-// course c1 ( "MT1008" , "Multivariable Calculus" , 3 , "Core" , 20.0 , 50.0 , 30.0 );
-// s1.add_course(&c1); 
-// s1.display() ;
-// int student_id = 1002 ; 
-//  DatabaseManager db ;
-//  db.load_courses() ; 
-//  db.load_students() ;
-//  cout << "Enter teacher id ";
-//  string teacher_id ;
-//  cin >> teacher_id;
-//  db.load_teachers() ; 
-// Teacher * t1 = db.getTeacher (1001); 
-//  t1->add_rating(3 , teacher_id);
- //  for ( int i = 0 ; i < 3 ; i++){
-//     cout << students[i].display ()  << endl ; 
-//  }
-// 
-//  db.load_weightages() ; 
-//  db.load_records(student_id);
-//  Student* studentPtr = db.getStudent(student_id); 
-//     if (studentPtr != nullptr) {
-//         cout << "if statement " << endl ; 
-//         studentPtr->calculate() ; 
-//         studentPtr->viewTranscript() ; // Now this will have the data loaded by db
-//        // studentPtr->display();   
-//     } else {
-    //     cout << "Student not found in Database!" << endl;
-    // }
-    // Teacher t1 ( "t2001" , "Dr. Smith" , "dr.smith@email.com" , "Mathematics" , "Multivariable Calculus" );
-    // t1.updateRecord("Multivariable Calculus");
-
-
-//s1.calculate() ; 
-
 DatabaseManager db;
-    Scheduler scheduler;
+    Scheduler sc;
 
-    // 1. Load your data
-    db.load_venues();
-    db.load_courses();
+db.load_students ();
+db.load_teachers () ; 
+db.load_weightages (); 
+db.load_venues () ; 
+db.load_courses() ;
 
-    // 2. Access the data from the database
-    // (Assuming you have getters like getClassesArray() and getVenuesArray())
-    // Classes** myClasses = db.getClassesArray();
-    // int cCount = db.getClassesCount();
+
+    int role = 0;
+
+    while (true) {
+        cout << "\n======================================" << endl;
+        cout << "   UNIVERSITY MANAGEMENT SYSTEM" << endl;
+        cout << "======================================" << endl;
+        cout << "1. Enter as Student" << endl;
+        cout << "2. Enter as Teacher" << endl;
+        cout << "3. Enter as Admin" << endl;
+        cout << "4. Exit" << endl;
+        cout << "Select Role: ";
+        cin >> role;
+        if (role == 4)break;
+        if (role == 1) { 
+            string id;
+            cout << "Enter Student ID: ";
+            cin >> id;
+            int numericID = stoi (id.substr(1));
+            Student* currentStudent = db.getStudent(numericID);
+            if (currentStudent != nullptr) {
+                cout << "Welcome, " << currentStudent->get_name() << "!" << endl;
     
-    // Venue** myVenues = db.getVenuesArray();
-    // int vCount = db.getVenuesCount();
+                int action;
+                cout << "1. View Transcript  2. Register Course\nAction: ";
+                cin >> action;
 
-    // 3. SORT before scheduling (Crucial for multi-venue logic)
-    // cout << "Sorting classes by student count..." << endl;
-    // sortClasses(myClasses, cCount);
+                if (action == 1){ 
+                    db.load_records(numericID);
+                    currentStudent->viewTranscript();}
+                else if (action == 2) {
+                    string cID;
+                    cout << "Enter Course ID: ";
+                    cin >> cID;
+                     int i  = db.findCourseByID(cID);
+                     cout << "The id has been found " << i << endl ; 
+                    //cout << "Temp : " << i; 
+                    currentStudent->add_course(db.classes , 2 , cID);
+                }
+            }
+             else {
+                cout << "Error: Student ID not found." << endl;
+            }}}
 
-    // 4. Run the scheduler and export to file
-    cout << "Starting allocation logic..." << endl;
-    scheduler.ScheduleandExport(db.classes, db.classescount, db.venues, db.venueCount);
+     
+    return 0;
+
 }

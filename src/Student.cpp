@@ -6,6 +6,7 @@
 #include "../include/Student.h"
 #include "../include/Course.h"
 #include "../include/Teacher.h"
+#include "../include/Classes.h"
 using namespace std ;
 
 // using scope resolution operator for definition of class methods 
@@ -30,29 +31,128 @@ void Student :: display () {
     }  
 }
 
-void Student :: add_course ( course* c ) {
-
-    if ( this->current_count == max_count ){
-        cout << "Max Credit hour limit reached. Cannot be enrolled in more courses " << endl ; 
+void Student::add_course(course* c) {
+    // 1. Create a bigger array
+    course* temp = new course[this->current_count + 1];
+    
+    // 2. Copy old courses
+    for (int i = 0; i < current_count; i++) {
+        temp[i] = this->courses[i];
     }
-    else {
-        if ( this->current_count == 0 ) {
-            this->courses = new course [1];
-            this->courses [0] = *c ; 
-            this->current_count ++ ; 
-            cout << "Course added successfully " << endl ;        }
-        else {
-        course * temp = new course [ this->current_count + 1 ] ;
-         for ( int i = 0 ; i < current_count ; i++) {
-            temp[i] = this->courses[i] ; 
-         }
-         temp[this->current_count] = *c ; 
-         this->current_count ++ ; 
-         delete [] this->courses ; 
-         this->courses = new course [ this->current_count ] ; 
-         this->courses = temp ; 
+
+    // 3. Add the new one
+    temp[current_count] = *c;
+    
+    // 4. Update pointer and count
+    delete[] this->courses;
+    this->courses = temp;
+    this->current_count++;
+}
+void Student::add_course(Classes** catalog, int catalogCount, string targetID) {
+    
+    // 1. LIMIT CHECK
+    if (this->current_count == max_count) {
+        cout << "Max Credit hour limit reached!" << endl;
+        return;
+    }
+
+    // 2. AUTO-FILL LOGIC (Find details from catalog)
+    Classes* foundTemplate = nullptr;
+    for (int i = 0; i < catalogCount; i++) {
+        if (catalog[i] != nullptr && catalog[i]->courseID == targetID) {
+            foundTemplate = catalog[i];
+            break;
         }
     }
+
+    if (!foundTemplate) {
+        cout << "Course ID " << targetID << " not found in catalog!" << endl;
+        return;
+    }
+
+    // 3. MEMORY UPDATE (Resize your array)
+    course* temp = new course[this->current_count + 1];
+    for (int i = 0; i < current_count; i++) {
+        temp[i] = this->courses[i];
+    }
+
+    // Fill the new course object with details from the catalog
+    temp[current_count].courseID = foundTemplate->courseID;
+    temp[current_count].Coursename = foundTemplate->courseName;
+    temp[current_count].courseType = foundTemplate->type;
+    temp[current_count].credits = (foundTemplate->type == "Core") ? 3 : 2;
+
+    delete[] this->courses;
+    this->courses = temp; // Point to the new larger array
+    this->current_count++;
+
+    // 4. FILE PERSISTENCE (Update Student.txt)
+   // 4. FILE PERSISTENCE (Update Student.txt)
+ifstream inFile("../data/Student.txt");
+ofstream outFile("../data/temp.txt");
+string line;
+
+if (!inFile.is_open() || !outFile.is_open()) {
+    cerr << "Error: Could not open student files for updating!" << endl;
+    return;
+}
+
+while (getline(inFile, line)) {
+    if (line.empty()) continue;
+
+    // Check if this line belongs to the current student
+    if (line.find(this->ID) != string::npos) {
+        
+        // Step A: Find the last pipe '|' where the courses list starts
+        size_t lastPipe = line.find_last_of('|');
+        if (lastPipe == string::npos) {
+            // If no pipe is found, something is wrong with the file format
+            outFile << line << endl;
+            continue;
+        }
+
+        // Step B: Split the line into the Info part and the Courses part
+        string baseInfo = line.substr(0, lastPipe + 1); // Up to the last '|'
+        string existingCourses = line.substr(lastPipe + 1);
+
+        // Step C: Clean up any hidden spaces or newlines
+        existingCourses.erase(0, existingCourses.find_first_not_of(" \t\r\n"));
+        size_t lastChar = existingCourses.find_last_not_of(" \t\r\n");
+        if (lastChar != string::npos) {
+            existingCourses = existingCourses.substr(0, lastChar + 1);
+        } else {
+            existingCourses = ""; // It was just whitespace
+        }
+
+        // Step D: Create the new entry (Format: Type:Name)
+        string newEntry = foundTemplate->type + ":" + foundTemplate->courseName;
+
+        // Step E: Combine everything back together
+        string updatedLine;
+        if (existingCourses.empty()) {
+            // If this is the first course being added
+            updatedLine = baseInfo + " " + newEntry;
+        } else {
+            // If courses already exist, add a comma
+            updatedLine = baseInfo + " " + existingCourses + "," + newEntry;
+        }
+
+        outFile << updatedLine << endl;
+    } else {
+        // Not the student we are looking for, keep the line as is
+        outFile << line << endl;
+    }
+}
+
+inFile.close();
+outFile.close();
+
+// Final Step: Replace the old file
+remove("../data/Student.txt");
+rename("../data/temp.txt", "../data/Student.txt");
+
+cout << "File updated successfully for student " << this->ID << endl;
+
 }
 
 Student :: ~Student () {

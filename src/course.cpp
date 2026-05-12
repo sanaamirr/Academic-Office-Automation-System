@@ -6,7 +6,8 @@
 #include <fstream>
 using namespace std ; 
 
-course :: course ( string Coursename ,  string courseType ,int credits , double qWeight , double eWeight , double aWeight) {
+course :: course ( string courseID , string Coursename ,  string courseType ,int credits , double qWeight , double eWeight , double aWeight) {
+this->courseID = courseID;
 this->Coursename = Coursename ; 
 this->credits = credits ; 
 this->courseType = courseType ; 
