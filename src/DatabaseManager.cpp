@@ -227,16 +227,12 @@ void DatabaseManager :: load_venues () {
         cout << "Error: Could not open venue file!" << endl;
         return;
     }
-    else {
-        cout << "file has been opened " << endl ; 
-    }
-
     string line;
     int index = 0;
     int maxVenues = 20; 
 
     while (getline(file, line) && index < maxVenues) {
-        cout << "Inside the loop " << endl ; 
+        
         if (line.empty()) continue;
 
         stringstream ss(line);
@@ -272,7 +268,6 @@ void DatabaseManager :: load_venues () {
 
     this->venueCount = index;
     file.close(); 
-    cout << "File has been closed" << endl ; 
     cout << "Successfully loaded " << venueCount << " venues." << endl;
    
 }
@@ -286,7 +281,6 @@ void DatabaseManager :: load_courses () {
     string line;
     int index = 0;
 
-    // Allocate the array of pointers if not already initialized
     // if (this->classesArray == nullptr) {
     //     this->classesArray = new Classes*[100]; 
     // }
@@ -311,8 +305,6 @@ void DatabaseManager :: load_courses () {
         assigned = (stoi(temp) != 0); 
 
         try {
-            // 2. Create the new Classes object using your constructor
-            // Note: Your constructor order is (ID, Name, Count, Type, isAssigned)
             classes[index] = new Classes(id, name, count, type, assigned);
             
             index++;

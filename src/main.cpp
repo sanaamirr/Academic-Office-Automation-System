@@ -6,15 +6,16 @@
 #include "../include/DatabaseManager.h"
 #include "../include/Teacher.h"
 #include "../include/Venue.h"
+#include "../include/Scheduler.h"
 using namespace std ; 
 int main () {
 // Student s1("s1002", "Sana", "sana@email.com", 3.5, 12, 0, 2 ); 
 // course c1 ( "MT1008" , "Multivariable Calculus" , 3 , "Core" , 20.0 , 50.0 , 30.0 );
 // s1.add_course(&c1); 
 // s1.display() ;
-int student_id = 1002 ; 
- DatabaseManager db ;
- db.load_courses() ; 
+// int student_id = 1002 ; 
+//  DatabaseManager db ;
+//  db.load_courses() ; 
 //  db.load_students() ;
 //  cout << "Enter teacher id ";
 //  string teacher_id ;
@@ -42,4 +43,27 @@ int student_id = 1002 ;
 
 
 //s1.calculate() ; 
+
+DatabaseManager db;
+    Scheduler scheduler;
+
+    // 1. Load your data
+    db.load_venues();
+    db.load_courses();
+
+    // 2. Access the data from the database
+    // (Assuming you have getters like getClassesArray() and getVenuesArray())
+    // Classes** myClasses = db.getClassesArray();
+    // int cCount = db.getClassesCount();
+    
+    // Venue** myVenues = db.getVenuesArray();
+    // int vCount = db.getVenuesCount();
+
+    // 3. SORT before scheduling (Crucial for multi-venue logic)
+    // cout << "Sorting classes by student count..." << endl;
+    // sortClasses(myClasses, cCount);
+
+    // 4. Run the scheduler and export to file
+    cout << "Starting allocation logic..." << endl;
+    scheduler.ScheduleandExport(db.classes, db.classescount, db.venues, db.venueCount);
 }
