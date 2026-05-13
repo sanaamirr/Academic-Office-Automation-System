@@ -8,11 +8,13 @@
 #include "../include/Teacher.h"
 using namespace std ;
 
-Teacher :: Teacher ( string id , string name , string email , string department , string subject , int rating_count , double total_ratingSum  ) : AcademicEntity ( id , name , email ) {
-this->department = department ;
-this->subject = subject ; 
+Teacher :: Teacher ( string id , string name , string email , string department , int rating_count , double total_ratingSum  ) : AcademicEntity ( id , name , email ) {
+this->department = department ; 
 this->rating_count = rating_count ; 
 this->total_ratingSum = total_ratingSum ; 
+for (int i = 0; i < 2; i++) {
+            assignedCourses[i] = "";
+        }
 } 
 
 void Teacher :: updateRecord ( const string& courseName ) {
@@ -26,8 +28,7 @@ void Teacher :: updateRecord ( const string& courseName ) {
         cout << "Course has been found " << endl ; 
     }
     ofstream tempfile ("temp.txt");
-// checking if the teacher is teaching this course or not 
-// how do i access the teachers info here doing this stuff in the main 
+cout << "\n--- Pinpoint Record Update ---" << endl;
 cout << "Enter student ID " << endl ;
 string studentID ;
 cin >> studentID ;
@@ -41,8 +42,24 @@ while ( getline ( coursefile , line ) ) {
     }
 }
 string record_to_update ; 
-cout << "Which record do you want to update ? " << endl ; 
+bool isValid = false ; 
+while (!isValid) {
+cout << "Which record do you want to update  ?(Enter in the format qn/Qn or an/An or en/En) " << endl ; 
 cin >> record_to_update ;
+if (record_to_update.length() == 2) {
+        char type = tolower(record_to_update[0]); 
+        char num = record_to_update[1];           
+
+        
+        if ((type == 'q' || type == 'a' || type == 'e') && (num == '1' || num == '2')) {
+            isValid = true;
+        }
+    }
+
+    if (!isValid) {
+        cout << "Invalid format! Use a letter (Q, A, E) followed by 1 or 2." << endl;
+    }
+}
 int count = 0 ;
 double new_score ;
 switch ( record_to_update[0] ) {
@@ -261,10 +278,16 @@ rename("temp.txt", filename.c_str());
 void Teacher :: display () {
     cout << "Teacher ID : " << this->ID << endl  
     << "Teacher Name  : " << this->name << endl <<"Teacher email : " << this->email << endl 
-    << "Department : " << this->department << endl 
-    << "Subject : " << this->subject << endl ;
+    << "Department : " << this->department << endl; 
 }
-
+// void Teacher :: assignCourse(string courseName) {
+//         if (courseCount < 10) {
+//             assignedCourses[courseCount] = courseName;
+//             courseCount++;
+//         } else {
+//             cout << "Full capacity for Professor " << name << endl;
+//         }
+//     }
 void Teacher :: add_rating( double score  , string teacher_id ){
     if (score< 1 || score > 5) {
         cout << "Error: Rating must be between 1 and 5." << endl;
@@ -322,3 +345,11 @@ void Teacher :: add_rating( double score  , string teacher_id ){
     if (found) cout << "Rating submitted! New Average: " << endl;
     else cout << "Teacher ID not found." << endl;
 }
+
+void Teacher :: assignCourse(string courseName) {
+        if (courseCount < 10) {
+            assignedCourses[courseCount++] = courseName;
+        } else {
+            cout << "Warning: Teacher course limit reached!" << endl;
+        }
+    }

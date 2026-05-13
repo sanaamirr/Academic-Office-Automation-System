@@ -61,9 +61,46 @@ db.load_courses() ;
             }
              else {
                 cout << "Error: Student ID not found." << endl;
-            }}}
+            }
+        }
 
-     
-    return 0;
+        else if (role == 2) { 
+    string tID;
+    cout << "Enter Teacher ID: ";
+    cin >> tID;
+    
+    int numericID = stoi(tID.substr(1));
+    Teacher* currentTeacher = db.getTeacher(numericID); 
 
+    if (currentTeacher != nullptr) {
+        cout << "\nWelcome, Professor " << currentTeacher->name << "!" << endl;
+        
+
+        cout << "Your Courses:" << endl;
+        for (int i = 0; i < currentTeacher->courseCount; i++) {
+            cout << i + 1 << ". " << currentTeacher->assignedCourses[i] << endl;
+        }
+
+        int courseChoice;
+        cout << "Select a course to manage: ";
+        cin >> courseChoice;
+
+        if (courseChoice > 0 && courseChoice <= currentTeacher->courseCount) {
+            string selectedCourse = currentTeacher->assignedCourses[courseChoice - 1];
+            
+            currentTeacher->updateRecord(selectedCourse);
+        } else {
+            cout << "Invalid course selection." << endl;
+        }
+    }}
+     else if ( role == 3 ){
+        cout << "Venue " << db.venueCount << "Classes " << db.classescount << endl ; 
+        cout << "Running Automated Scheduler..." << endl;
+        Scheduler sh ; 
+        sh.ScheduleandExport( db.classes , db.classescount  ,  db.venues , db.venueCount);} 
+    
+    else {
+        cout << "Logging out..." << endl;
+    }
 }
+}    
